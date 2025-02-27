@@ -1,41 +1,74 @@
+
 <!DOCTYPE html>
 <html>
 <head>
     <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 350px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #075e54;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background-color: #075e54;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #128c7e;
+        }
+
+        p {
+            margin-top: 15px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Login</h1>
-    <form id="login-form">
-        <input type="text" id="username" placeholder="Username" required>
-        <input type="password" id="password" placeholder="Password" required>
-        <input type="text" id="room_name" placeholder="Enter Chat Room Name" required>
-        <button type="submit">Login</button>
-    </form>
-    <p>Don't have an account? <a href="/register/">Register</a></p>
-    {% comment %} <script>
-        document.getElementById('login-form').onsubmit = async function (e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const roomName = document.getElementById('room_name').value;
-
-            const response = await fetch('/api/users/login/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username, password }),
-            });
-            const data = await response.json();
-            if (response.ok) {
-                localStorage.setItem('access_token', data.access);
-                // Redirect to the chat room with the specified room name
-                window.location.href = `/chat/${roomName}/`;
-            } else {
-                alert(data.error || 'Login failed');
-            }
-        };
-    </script> {% endcomment %}
+    <div class="login-container">
+        <h1>Login</h1>
+        <form id="login-form">
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <input type="text" id="room_name" placeholder="Enter Chat Room Name" required>
+            <button type="submit">Login</button>
+        </form>
+        <p>Don't have an account? <a href="/register/">Register</a></p>
+    </div>
     <script>
         document.getElementById('login-form').onsubmit = async function (e) {
             e.preventDefault();
@@ -53,15 +86,12 @@
     
             if (response.ok) {
                 localStorage.setItem('access_token', data.access);
-                localStorage.setItem('username', username);  // Store username
+                localStorage.setItem('username', username);
                 window.location.href = `/chat/${roomName}/`;
             } else {
                 alert(data.error || 'Login failed');
             }
         };
     </script>
-    
-
-    
 </body>
 </html>
