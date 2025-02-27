@@ -1,18 +1,28 @@
+
 <!DOCTYPE html>
 <html>
 <head>
+    {% load static %}
     <title>Chat Room</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #ece5dd;
+            background: url("{% static 'images/whastapp.jpg' %}") no-repeat center center fixed;
+            background-size: cover;
             display: flex;
             flex-direction: column;
             align-items: center;
+            margin: 0;
+            padding: 0;
         }
 
         h1 {
-            color: #075e54;
+            color: #ffffff;
+            background-color: #075e54;
+            width: 100%;
+            text-align: center;
+            padding: 15px 0;
+            margin: 0;
         }
 
         #chat-log {
@@ -22,20 +32,22 @@
             overflow-y: auto;
             border-radius: 10px;
             padding: 10px;
-            background-color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.8);
             display: flex;
             flex-direction: column;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .message {
             padding: 10px 15px;
-            margin: 5px 0;
-            border-radius: 10px;
+            margin: 8px 5px;
+            border-radius: 15px;
             max-width: 70%;
             word-wrap: break-word;
             font-size: 14px;
             display: inline-block;
             position: relative;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
         }
 
         .sent {
@@ -43,7 +55,6 @@
             align-self: flex-end;
             text-align: left;
             border-bottom-right-radius: 0px;
-            margin-left: auto;
         }
 
         .received {
@@ -51,7 +62,6 @@
             align-self: flex-start;
             text-align: left;
             border-bottom-left-radius: 0px;
-            margin-right: auto;
         }
 
         .username {
@@ -59,22 +69,37 @@
             font-weight: bold;
             color: #075e54;
             display: block;
+            margin-bottom: 3px;
+        }
+
+        .chat-input-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+            background: #ffffff;
+            padding: 10px;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
         }
 
         #chat-message-input {
             width: 75%;
-            padding: 10px;
-            border-radius: 5px;
+            padding: 12px;
+            border-radius: 20px;
             border: 1px solid #ccc;
+            outline: none;
         }
 
         #chat-message-submit {
-            padding: 10px 15px;
+            padding: 12px 20px;
             border: none;
             background-color: #075e54;
             color: white;
             cursor: pointer;
-            border-radius: 5px;
+            border-radius: 20px;
+            margin-left: 10px;
+            font-weight: bold;
         }
 
         #chat-message-submit:hover {
@@ -85,86 +110,21 @@
 <body>
     <h1>Room: {{ room_name }}</h1>
     <div id="chat-log"></div>
-    <input id="chat-message-input" type="text" placeholder="Type a message...">
-    <input id="chat-message-submit" type="button" value="Send">
-    
-    {% comment %} <script>
-        const roomName = "{{ room_name }}";
-        const token = localStorage.getItem("access_token");
-
-        if (!token) {
-            alert("No token found. Please log in.");
-            window.location.href = "/login/";
-        }
-
-        // Decode JWT Token to Extract Username
-        function parseJwt(token) {
-            try {
-                const base64Url = token.split('.')[1];
-                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
-                return JSON.parse(jsonPayload);
-            } catch (e) {
-                console.error("Invalid token", e);
-                return null;
-            }
-        }
-
-        const decodedToken = parseJwt(token);
-        console.log("Decoded JWT Token:", decodedToken); // Debugging
-        const username = decodedToken?.username || decodedToken?.user || decodedToken?.sub || null; // Check multiple possible fields
-
-        console.log("Current User:", username); // Debugging
-
-        const chatSocket = new WebSocket(
-            `ws://${window.location.host}/ws/chat/${roomName}/?token=${token}`
-        );
-
-        chatSocket.onmessage = function (e) {
-            const data = JSON.parse(e.data);
-            const chatLog = document.querySelector("#chat-log");
-            const messageElement = document.createElement("div");
-            messageElement.classList.add("message");
-
-            console.log(`Received message from: ${data.username}, Current user: ${username}`); // Debugging
-
-            if (data.username === username) {
-                messageElement.classList.add("sent");
-            } else {
-                messageElement.classList.add("received");
-            }
-
-            messageElement.innerHTML = `<span class="username">${data.username}</span>${data.message}`;
-            chatLog.appendChild(messageElement);
-            chatLog.scrollTop = chatLog.scrollHeight;
-        };
-
-        document.querySelector("#chat-message-submit").onclick = function () {
-            const messageInput = document.querySelector("#chat-message-input");
-            const message = messageInput.value.trim();
-
-            if (message !== "") {
-                chatSocket.send(JSON.stringify({
-                    "message": message,
-                    "username": username  // Use extracted username
-                }));
-                messageInput.value = "";
-            }
-        };
-    </script> {% endcomment %}
+    <div class="chat-input-container">
+        <input id="chat-message-input" type="text" placeholder="Type a message...">
+        <input id="chat-message-submit" type="button" value="Send">
+    </div>
     <script>
         const roomName = "{{ room_name }}";
         const token = localStorage.getItem("access_token");
-        const username = localStorage.getItem("username");  // ✅ Get stored username
+        const username = localStorage.getItem("username");
     
         if (!token || !username) {
             alert("No token or username found. Please log in.");
             window.location.href = "/login/";
         }
     
-        console.log("Current User:", username); // Debugging
+        console.log("Current User:", username);
     
         const chatSocket = new WebSocket(
             `ws://${window.location.host}/ws/chat/${roomName}/?token=${token}`
@@ -176,7 +136,7 @@
             const messageElement = document.createElement("div");
             messageElement.classList.add("message");
     
-            console.log(`Received message from: ${data.username}, Current user: ${username}`); // Debugging
+            console.log(`Received message from: ${data.username}, Current user: ${username}`);
     
             if (data.username === username) {
                 messageElement.classList.add("sent");
@@ -196,152 +156,7 @@
             if (message !== "") {
                 chatSocket.send(JSON.stringify({
                     "message": message,
-                    "username": username  // Use stored username
-                }));
-                messageInput.value = "";
-            }
-        };
-    </script>
-    
-</body>
-</html>
-
-
-{% comment %} 
-
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Chat Room</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #ece5dd;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        h1 {
-            color: #075e54;
-        }
-
-        #chat-log {
-            width: 90%;
-            max-width: 600px;
-            height: 500px;
-            overflow-y: auto;
-            border-radius: 10px;
-            padding: 10px;
-            background-color: #ffffff;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .message {
-            padding: 10px 15px;
-            margin: 5px 0;
-            border-radius: 10px;
-            max-width: 70%;
-            word-wrap: break-word;
-            font-size: 14px;
-            display: inline-block;
-            position: relative;
-        }
-
-        .sent {
-            background-color: #dcf8c6;
-            align-self: flex-end;
-            text-align: left;
-            border-bottom-right-radius: 0px;
-            margin-left: auto;
-        }
-
-        .received {
-            background-color: #f1f0f0;
-            align-self: flex-start;
-            text-align: left;
-            border-bottom-left-radius: 0px;
-            margin-right: auto;
-        }
-
-        .username {
-            font-size: 12px;
-            font-weight: bold;
-            color: #075e54;
-            display: block;
-        }
-
-        #chat-message-input {
-            width: 75%;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-
-        #chat-message-submit {
-            padding: 10px 15px;
-            border: none;
-            background-color: #075e54;
-            color: white;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        #chat-message-submit:hover {
-            background-color: #128c7e;
-        }
-    </style>
-</head>
-<body>
-    <h1>Room: {{ room_name }}</h1>
-    <div id="chat-log"></div>
-    <input id="chat-message-input" type="text" placeholder="Type a message...">
-    <input id="chat-message-submit" type="button" value="Send">
-    
-    <script>
-        const roomName = "{{ room_name }}";
-        const username = "{{ username }}";  
-        const token = localStorage.getItem("access_token");
-
-        if (!token) {
-            alert("No token found. Please log in.");
-            window.location.href = "/login/";
-        }
-
-        const chatSocket = new WebSocket(
-            `ws://${window.location.host}/ws/chat/${roomName}/?token=${token}`
-        );
-
-        chatSocket.onmessage = function (e) {
-            const data = JSON.parse(e.data);
-            const chatLog = document.querySelector("#chat-log");
-            const messageElement = document.createElement("div");
-            messageElement.classList.add("message");
-
-            console.log(`Received message from: ${data.username}, Current user: ${username}`); // Debugging log
-
-            if (data.username === username) {
-                // If the sender is the current user, show message on the right
-                messageElement.classList.add("sent");
-            } else {
-                // If the sender is another user, show message on the left
-                messageElement.classList.add("received");
-            }
-
-            messageElement.innerHTML = `<span class="username">${data.username}</span>${data.message}`;
-            chatLog.appendChild(messageElement);
-            chatLog.scrollTop = chatLog.scrollHeight;
-        };
-
-        document.querySelector("#chat-message-submit").onclick = function () {
-            const messageInput = document.querySelector("#chat-message-input");
-            const message = messageInput.value.trim();
-
-            if (message !== "") {
-                chatSocket.send(JSON.stringify({
-                    "message": message,
-                    "username": username  
+                    "username": username
                 }));
                 messageInput.value = "";
             }
@@ -349,4 +164,3 @@
     </script>
 </body>
 </html>
- {% endcomment %}
