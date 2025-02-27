@@ -1,0 +1,138 @@
+{% comment %} <!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Room</title>
+</head>
+<body>
+    <h1>Room: {{ room_name }}</h1>
+    <div id="chat-log"></div>
+    <input id="chat-message-input" type="text" size="100">
+    <input id="chat-message-submit" type="button" value="Send">
+    <script>
+        const roomName = "{{ room_name }}";
+        const token = localStorage.getItem("access_token");
+    
+        if (!token) {
+            alert("No token found. Please log in.");
+            window.location.href = "/login/";
+        }
+    
+        const chatSocket = new WebSocket(
+            `ws://${window.location.host}/ws/chat/${roomName}/?token=${token}`
+        );
+    
+        chatSocket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            document.querySelector("#chat-log").innerHTML += `<b>${data.username}</b>: ${data.message}<br>`;
+        };
+    
+        document.querySelector("#chat-message-submit").onclick = function (e) {
+            const messageInput = document.querySelector("#chat-message-input");
+            const message = messageInput.value;
+            const username = "{{ username }}";
+
+            chatSocket.send(JSON.stringify({
+                "message": message,
+                "username": "{{ request.user.username }}"
+            }));
+    
+            messageInput.value = "";
+        };
+    </script>
+    
+</body>
+</html>     {% endcomment %}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Room</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #chat-log {
+            width: 80%;
+            max-width: 600px;
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        .message {
+            padding: 8px 12px;
+            margin: 5px;
+            border-radius: 10px;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+        .sent {
+            background-color: #dcf8c6;
+            align-self: flex-end;
+            text-align: right;
+        }
+        .received {
+            background-color: #f1f0f0;
+            align-self: flex-start;
+            text-align: left;
+        }
+        #chat-message-input {
+            width: 75%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Room: {{ room_name }}</h1>
+    <div id="chat-log"></div>
+    <input id="chat-message-input" type="text" size="100">
+    <input id="chat-message-submit" type="button" value="Send">
+    <script>
+        const roomName = "{{ room_name }}";
+        const username = "{{ username }}";
+        const token = localStorage.getItem("access_token");
+    
+        if (!token) {
+            alert("No token found. Please log in.");
+            window.location.href = "/login/";
+        }
+    
+        const chatSocket = new WebSocket(
+            `ws://${window.location.host}/ws/chat/${roomName}/?token=${token}`
+        );
+    
+        chatSocket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            const chatLog = document.querySelector("#chat-log");
+            const messageElement = document.createElement("div");
+            messageElement.classList.add("message");
+            
+            if (data.username === username) {
+                messageElement.classList.add("sent");
+            } else {
+                messageElement.classList.add("received");
+            }
+            
+            messageElement.innerHTML = `<b>${data.username}</b>: ${data.message}`;
+            chatLog.appendChild(messageElement);
+            chatLog.scrollTop = chatLog.scrollHeight;
+        };
+    
+        document.querySelector("#chat-message-submit").onclick = function () {
+            const messageInput = document.querySelector("#chat-message-input");
+            const message = messageInput.value.trim();
+            
+            if (message !== "") {
+                chatSocket.send(JSON.stringify({
+                    "message": message,
+                    "username": username
+                }));
+                messageInput.value = "";
+            }
+        };
+    </script>
+</body>
+</html>
